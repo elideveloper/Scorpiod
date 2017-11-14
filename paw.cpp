@@ -17,6 +17,8 @@ Paw::Paw(Servo alpha, Servo phi, Servo psi) : servoAlpha(alpha), servoPhi(phi), 
 }
 
 // speed = [-5; 5]
+// m b just receive values from Joystic and call function that returns angle of turn and speed - for arbitrary directions
+// arbitrary directions is combine of computeStepSideway() and computeStepForward() depending on Teta (direction angle)
 StepAngles* Paw::computeStepForward(int speed)
 {
 	int speedAbs = abs(speed);

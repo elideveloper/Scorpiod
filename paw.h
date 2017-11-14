@@ -11,7 +11,9 @@ class Paw {
 public:
 	Paw(Servo alpha, Servo phi, Servo psi);		// attach 3 servos
 	//void setInitState();
-	StepAngles* computeStepForward(int speed);
+	// func that returns speed and angle from Joystic values: x, y
+	StepAngles* computeStepForward(int speed);			// forward and backward
+	// StepAngles* computeStepSideway(int speed);		// crab lef-right
 private:
 	double femur;
 	double tibia;

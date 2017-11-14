@@ -19,26 +19,17 @@ struct Angles {
 
 double femur = 220.0;
 double tibia = 350.0;
-double initBodyHeight = 200.0;																					//mm
+double initBodyHeight = 200.0;																				
 double initAlpha = degreeToRad(90);
 double initPhi = degreeToRad(95);
 double initPsi = degreeToRad(80);
 double initHyp = sqrt(femur*femur + tibia*tibia - 2*cos(initPsi)*tibia*femur);
-double initLegHorizLength = sqrt(initHyp*initHyp - initBodyHeight*initBodyHeight);								//mm
+double initLegHorizLength = sqrt(initHyp*initHyp - initBodyHeight*initBodyHeight);							
 
-// здесь можно не делать дискретную скорость,
-// а просто передавать нормированное значение double с джойстика
-// чтобы скорости плавные были
 Angles computeAngles(double speed) {
 	if (speed == 0.0) return Angles(initPhi, initPsi, initAlpha);
 	double stepLength = speed * 10.0;						// 10, 20, 30, 40, 50 mm
 	double stepSemiLength = speed * 5.0;						
-	// добавить начальный угол отклонения лапы
-	/*double pawHorizL0 = (initAlpha != 0.0) ? initLegHorizLength * cos(initAlpha) : initLegHorizLength;
-	double pawHorizL1 = sqrt(pawHorizL0*pawHorizL0 + stepSemiLength*stepSemiLength);
-	double alpha1 = atan(stepSemiLength / pawHorizL0);
-	double pawHorizL2 = sqrt(pawHorizL0*pawHorizL0 + stepLength*stepLength);
-	double alpha2 = atan(stepLength / pawHorizL0);*/
 
 	double pawHorizL1 = sqrt(initLegHorizLength*initLegHorizLength + stepSemiLength*stepSemiLength - 2*initLegHorizLength*stepSemiLength*cos(initAlpha));
 	double alpha1 = initAlpha + acos((pawHorizL1*pawHorizL1 + initLegHorizLength*initLegHorizLength - stepSemiLength*stepSemiLength) / (2*pawHorizL1*initLegHorizLength));
@@ -69,7 +60,7 @@ int main() {
 
 	Servo s1, s2, s3;
 	Paw paw(s1, s2, s3);
-	paw.computeStepForward(5);
+	paw.computeStepForward(-5);
 
 
 	system("pause");

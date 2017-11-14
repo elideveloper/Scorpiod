@@ -32,6 +32,12 @@ StepAngles* Paw::computeStepForward(int speed)
 	double alphaDiff1 = acos((pawHorizL1 * pawHorizL1 + pawHorizL0 * pawHorizL0 - stepSemiLength * stepSemiLength) / (2 * pawHorizL1 * pawHorizL0));
 	double pawHorizL2 = sqrt(pawHorizL1 * pawHorizL1 + stepSemiLength * stepSemiLength - 2 * pawHorizL1 * stepSemiLength * cos(alphaDiff1 + this->alpha));
 	double alphaDiff2 = acos((pawHorizL1 * pawHorizL1 + pawHorizL2 * pawHorizL2 - stepSemiLength * stepSemiLength) / (2 * pawHorizL1 * pawHorizL2));
+	
+	// if speed < 0 then negative alpha
+	if (speed < 0) {
+		alphaDiff1 = -alphaDiff1;
+		alphaDiff2 = -alphaDiff2;
+	}
 
 	double hyp1 = sqrt(pawHorizL1 * pawHorizL1 + (this->bodyHeight - heightDelta) * (this->bodyHeight - heightDelta));
 	double psiDiff1 = acos((this->femur * this->femur + this->tibia * this->tibia - hyp1 * hyp1) / (2 * this->femur * this->tibia)) - this->psi;
@@ -40,8 +46,6 @@ StepAngles* Paw::computeStepForward(int speed)
 	double psiDiff2 = acos((this->femur * this->femur + this->tibia * this->tibia - hyp2 * hyp2) / (2 * this->femur * this->tibia)) - psiDiff1 - this->psi;
 	double phiDiff2 = acos((hyp2 * hyp2 + this->femur * this->femur - this->tibia * this->tibia) / (2 * this->femur * hyp2)) - phiDiff1;
 
-
-	// углы Фи и Пси тоже как Альфа переделать
 	double alphaStep = alphaDiff1 / 10.0;
 	double phiStep = phiDiff1 / 10.0;
 	double psiStep = psiDiff1 / 10.0;

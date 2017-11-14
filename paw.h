@@ -6,6 +6,7 @@
 #include "step_angles.h"
 #include "utility.h"
 
+// paw receive type of paw to init starting position
 class Paw {
 public:
 	Paw(Servo alpha, Servo phi, Servo psi);		// attach 3 servos

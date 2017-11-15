@@ -14,29 +14,30 @@ Paw::Paw(Servo alpha, Servo phi, Servo psi) : servoAlpha(alpha), servoPhi(phi), 
 	this->alpha = degreeToRad(90);
 	this->phi = degreeToRad(95);
 	this->psi = degreeToRad(80);
+	this->speed = 0;
+	this->dirAngle = 0.0;
 }
 
 // speed = [-5; 5]
 // m b just receive values from Joystic and call function that returns angle of turn and speed - for arbitrary directions
-// arbitrary directions is combine of computeStepSideway() and computeStepForward() depending on Teta (direction angle)
-StepAngles* Paw::computeStepForward(int speed)
+// arbitrary directions is combine of computeStepSideway() and computeStepForward() depending on direction angle
+StepAngles* Paw::computeStepForward()
 {
-	int speedAbs = abs(speed);
-	if (speedAbs < MIN_FLOAT) return nullptr;
-	double stepSemiLength = speedAbs * 5.0;
+	if (this->speed == 0) return nullptr;
+	int speedAbs = abs(this->speed);
+
+	double stepSemiLength = speedAbs * 0.5;		// cm
+	double heightDelta = 5.0 / speedAbs;
+
 	double hyp0 = sqrt(this->femur * this->femur + this->tibia * this->tibia - 2 * cos(this->psi) * this->tibia * this->femur);
 	double pawHorizL0 = sqrt(hyp0 * hyp0 - this->bodyHeight * this->bodyHeight);
-	double heightDelta = 50.0 / speedAbs;
-
-	StepAngles* stepAngles = new StepAngles(20);
-
 	double pawHorizL1 = sqrt(pawHorizL0 * pawHorizL0 + stepSemiLength * stepSemiLength - 2 * pawHorizL0 * stepSemiLength * cos(this->alpha));
 	double alphaDiff1 = acos((pawHorizL1 * pawHorizL1 + pawHorizL0 * pawHorizL0 - stepSemiLength * stepSemiLength) / (2 * pawHorizL1 * pawHorizL0));
 	double pawHorizL2 = sqrt(pawHorizL1 * pawHorizL1 + stepSemiLength * stepSemiLength - 2 * pawHorizL1 * stepSemiLength * cos(alphaDiff1 + this->alpha));
 	double alphaDiff2 = acos((pawHorizL1 * pawHorizL1 + pawHorizL2 * pawHorizL2 - stepSemiLength * stepSemiLength) / (2 * pawHorizL1 * pawHorizL2));
 	
 	// if speed < 0 then negative alpha
-	if (speed < 0) {
+	if (this->speed < 0) {
 		alphaDiff1 = -alphaDiff1;
 		alphaDiff2 = -alphaDiff2;
 	}
@@ -48,6 +49,7 @@ StepAngles* Paw::computeStepForward(int speed)
 	double psiDiff2 = acos((this->femur * this->femur + this->tibia * this->tibia - hyp2 * hyp2) / (2 * this->femur * this->tibia)) - psiDiff1 - this->psi;
 	double phiDiff2 = acos((hyp2 * hyp2 + this->femur * this->femur - this->tibia * this->tibia) / (2 * this->femur * hyp2)) - phiDiff1;
 
+	StepAngles* stepAngles = new StepAngles(20);
 	double alphaStep = alphaDiff1 / 10.0;
 	double phiStep = phiDiff1 / 10.0;
 	double psiStep = psiDiff1 / 10.0;
@@ -77,4 +79,23 @@ StepAngles* Paw::computeStepForward(int speed)
 	}
 
 	return stepAngles;
+}
+
+void Paw::computeSpeedAndDirection(int joyX, int joyY)
+{
+	// correct values for real joystick
+	int x = joyX - 511;
+	int y = joyY - 511;
+	double bound = degreeToRad(10);
+	// consider all combinations of +-x and +-y and make speed negative when both are negative
+	checkInternalBoundaries(-bound, bound, this->dirAngle, atan(x / y)); // correct dir angles +-10 degree is not considered
+	// check also crab boundaries +- on x axis
+	
+	if (abs(this->dirAngle) < MIN_FLOAT) {
+		this->speed = y / 100;
+	}
+	else {
+		double hypSpeed = sqrt(x * x + y * y);
+		this->speed = hypSpeed / 150;
+	}
 }

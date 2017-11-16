@@ -10,13 +10,13 @@ double degreeToRad(double angle) {
 	return angle * PI / 180.0;
 }
 
-double checkExternalBoundaries(double min, double max, double & val)
+void checkExternalBoundaries(double min, double max, double & val)
 {
 	if (val < min) val = min;
 	else if (val > max) val = max;
 }
 
-double checkInternalBoundaries(double min, double max, double & val, double nextVal)
+void checkInternalBoundaries(double min, double max, double & val, double nextVal)
 {
-	if (val < min || val > max) val = nextVal;
+	if (nextVal < min || nextVal > max) val = nextVal;
 }

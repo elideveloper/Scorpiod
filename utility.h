@@ -6,8 +6,8 @@
 double radToDegree(double angle);
 double degreeToRad(double angle);
 
-double checkExternalBoundaries(double min, double max, double & val);
-double checkInternalBoundaries(double min, double max, double & val, double nextVal);
+void checkExternalBoundaries(double min, double max, double & val);
+void checkInternalBoundaries(double min, double max, double & val, double nextVal);
 
 
 // -------------

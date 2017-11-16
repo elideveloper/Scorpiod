@@ -21,13 +21,14 @@ Paw::Paw(Servo alpha, Servo phi, Servo psi) : servoAlpha(alpha), servoPhi(phi), 
 // speed = [-5; 5]
 // m b just receive values from Joystic and call function that returns angle of turn and speed - for arbitrary directions
 // arbitrary directions is combine of computeStepSideway() and computeStepForward() depending on direction angle
-StepAngles* Paw::computeStepForward()
+StepAngles* Paw::computeStepForward(int joyX, int joyY)
 {
+	this->computeSpeedAndDirection(joyX, joyY);
 	if (this->speed == 0) return nullptr;
 	int speedAbs = abs(this->speed);
 
-	double stepSemiLength = speedAbs * 0.5;		// cm
-	double heightDelta = 5.0 / speedAbs;
+	double stepSemiLength = speedAbs * 5.0;		// mm
+	double heightDelta = 50.0 / speedAbs;		// mm
 
 	double hyp0 = sqrt(this->femur * this->femur + this->tibia * this->tibia - 2 * cos(this->psi) * this->tibia * this->femur);
 	double pawHorizL0 = sqrt(hyp0 * hyp0 - this->bodyHeight * this->bodyHeight);
@@ -87,10 +88,17 @@ void Paw::computeSpeedAndDirection(int joyX, int joyY)
 	int x = joyX - 511;
 	int y = joyY - 511;
 	double bound = degreeToRad(10);
+	double realDirAngle = atan((double)x / y);
+	printf("real_dir_angle=%.2f;\n", radToDegree(realDirAngle));
 	// consider all combinations of +-x and +-y and make speed negative when both are negative
-	checkInternalBoundaries(-bound, bound, this->dirAngle, atan(x / y)); // correct dir angles +-10 degree is not considered
-	// check also crab boundaries +- on x axis
-	
+	if (x < y) {
+		checkInternalBoundaries(-bound, bound, this->dirAngle, /*how to deal with division by zero?*/ realDirAngle); // correct dir angles +-10 degree is not considered
+	}
+	else {
+		this->dirAngle = PI / 2.0;
+		checkInternalBoundaries(PI / 2.0 - bound, PI / 2.0 + bound, this->dirAngle, /*how to deal with division by zero?*/ realDirAngle);
+	}
+
 	if (abs(this->dirAngle) < MIN_FLOAT) {
 		this->speed = y / 100;
 	}
@@ -98,4 +106,6 @@ void Paw::computeSpeedAndDirection(int joyX, int joyY)
 		double hypSpeed = sqrt(x * x + y * y);
 		this->speed = hypSpeed / 150;
 	}
+
+	printf("dir_angle=%.2f; speed=%d;\n", radToDegree(this->dirAngle), this->speed);
 }

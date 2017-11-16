@@ -46,7 +46,7 @@ Angles computeAngles(double speed) {
 	double psi2 = acos((femur*femur + tibia*tibia - hyp2*hyp2) / (2 * femur*tibia));
 	double phi2 = initPhi + acos((hyp2*hyp2 + femur*femur - tibia*tibia) / (2 * femur*hyp2));
 
-	printf("hyp1=%.2f; phi2=%.2f; psi2=%.2f;\n", hyp1, radToDegree(phi1), radToDegree(psi1));
+	printf("hyp1=%.2f; phi1=%.2f; psi1=%.2f;\n", hyp1, radToDegree(phi1), radToDegree(psi1));
 	printf("hyp2=%.2f; phi2=%.2f; psi2=%.2f;\n", hyp2, radToDegree(phi2), radToDegree(psi2));
 
 	return Angles(phi2, psi2, alpha2);
@@ -56,11 +56,11 @@ Angles computeAngles(double speed) {
 
 int main() {
 
-	computeAngles(5.0);
+	computeAngles(4.0);
 
 	Servo s1, s2, s3;
 	Paw paw(s1, s2, s3);
-	paw.computeStepForward(-5);
+	paw.computeStepForward(1000, 520);
 
 
 	system("pause");

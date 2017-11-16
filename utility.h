@@ -1,7 +1,7 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
-#define MIN_FLOAT 0.0001
+#define MIN_FLOAT 0.00001
 
 double radToDegree(double angle);
 double degreeToRad(double angle);

@@ -56,11 +56,11 @@ Angles computeAngles(double speed) {
 
 int main() {
 
-	computeAngles(4.0);
+	//computeAngles(4.0);
 
 	Servo s1, s2, s3;
 	Paw paw(s1, s2, s3);
-	paw.computeStepForward(1000, 520);
+	paw.computeStepForward(511, 1020);
 
 
 	system("pause");

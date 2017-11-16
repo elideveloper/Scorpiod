@@ -32,9 +32,9 @@ StepAngles* Paw::computeStepForward(int joyX, int joyY)
 
 	double hyp0 = sqrt(this->femur * this->femur + this->tibia * this->tibia - 2 * cos(this->psi) * this->tibia * this->femur);
 	double pawHorizL0 = sqrt(hyp0 * hyp0 - this->bodyHeight * this->bodyHeight);
-	double pawHorizL1 = sqrt(pawHorizL0 * pawHorizL0 + stepSemiLength * stepSemiLength - 2 * pawHorizL0 * stepSemiLength * cos(this->alpha));
+	double pawHorizL1 = sqrt(pawHorizL0 * pawHorizL0 + stepSemiLength * stepSemiLength - 2 * pawHorizL0 * stepSemiLength * cos(this->alpha + this->dirAngle));	//!!! add dir angle to find L1 in right direction
 	double alphaDiff1 = acos((pawHorizL1 * pawHorizL1 + pawHorizL0 * pawHorizL0 - stepSemiLength * stepSemiLength) / (2 * pawHorizL1 * pawHorizL0));
-	double pawHorizL2 = sqrt(pawHorizL1 * pawHorizL1 + stepSemiLength * stepSemiLength - 2 * pawHorizL1 * stepSemiLength * cos(alphaDiff1 + this->alpha));
+	double pawHorizL2 = sqrt(pawHorizL1 * pawHorizL1 + stepSemiLength * stepSemiLength - 2 * pawHorizL1 * stepSemiLength * cos(alphaDiff1 + this->alpha + this->dirAngle));//!!! add dir angle to find L1 in right direction
 	double alphaDiff2 = acos((pawHorizL1 * pawHorizL1 + pawHorizL2 * pawHorizL2 - stepSemiLength * stepSemiLength) / (2 * pawHorizL1 * pawHorizL2));
 	
 	// if speed < 0 then negative alpha
@@ -84,27 +84,21 @@ StepAngles* Paw::computeStepForward(int joyX, int joyY)
 
 void Paw::computeSpeedAndDirection(int joyX, int joyY)
 {
-	// correct values for real joystick
+	// correct values for real joystick or check internal values and do not consider little deviations
 	int x = joyX - 511;
 	int y = joyY - 511;
 	double bound = degreeToRad(10);
 	double realDirAngle = atan((double)x / y);
 	printf("real_dir_angle=%.2f;\n", radToDegree(realDirAngle));
-	// consider all combinations of +-x and +-y and make speed negative when both are negative
-	if (x < y) {
-		checkInternalBoundaries(-bound, bound, this->dirAngle, /*how to deal with division by zero?*/ realDirAngle); // correct dir angles +-10 degree is not considered
-	}
-	else {
-		this->dirAngle = PI / 2.0;
-		checkInternalBoundaries(PI / 2.0 - bound, PI / 2.0 + bound, this->dirAngle, /*how to deal with division by zero?*/ realDirAngle);
-	}
 
-	if (abs(this->dirAngle) < MIN_FLOAT) {
-		this->speed = y / 100;
-	}
-	else {
-		double hypSpeed = sqrt(x * x + y * y);
-		this->speed = hypSpeed / 150;
+	// very little deviations does not consider
+	if (realDirAngle < bound - PI / 2.0) { this->dirAngle = -PI / 2.0; this->speed = abs(x) / 100; }
+	else if (realDirAngle > PI / 2.0 - bound) { this->dirAngle = PI / 2.0; this->speed = abs(x) / 100; }
+	else if (abs(realDirAngle) < bound) { this->dirAngle = 0.0; this->speed = y / 100; }
+	else { 
+		this->dirAngle = realDirAngle; 
+		this->speed = sqrt(x * x + y * y) / 150;
+		if (y < 0) this->speed = -this->speed;
 	}
 
 	printf("dir_angle=%.2f; speed=%d;\n", radToDegree(this->dirAngle), this->speed);

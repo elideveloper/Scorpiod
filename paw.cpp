@@ -8,12 +8,12 @@
 Paw::Paw(Servo alpha, Servo phi, Servo psi) : servoAlpha(alpha), servoPhi(phi), servoPsi(psi)
 {
 	// set initial angles
-	this->femur = femur = 220.0;
-	this->tibia = 350.0;
-	this->bodyHeight = 200.0;
+	this->femur = femur = 120.0;
+	this->tibia = 100.0;
+	this->bodyHeight = 60.0;
 	this->alpha = degreeToRad(90);
-	this->phi = degreeToRad(95);
-	this->psi = degreeToRad(80);
+	this->phi = degreeToRad(120);
+	this->psi = degreeToRad(85);
 	this->speed = 0;
 	this->dirAngle = 0.0;
 }
@@ -45,10 +45,12 @@ StepAngles* Paw::computeStepForward(int joyX, int joyY)
 
 	double hyp1 = sqrt(pawHorizL1 * pawHorizL1 + (this->bodyHeight - heightDelta) * (this->bodyHeight - heightDelta));
 	double psiDiff1 = acos((this->femur * this->femur + this->tibia * this->tibia - hyp1 * hyp1) / (2 * this->femur * this->tibia)) - this->psi;
-	double phiDiff1 = acos((hyp1 * hyp1 + this->femur * this->femur - this->tibia * this->tibia) / (2 * this->femur * hyp1));
+	double phiDiff1 = acos((hyp1 * hyp1 + this->femur * this->femur - this->tibia * this->tibia) / (2 * this->femur * hyp1)) +
+		asin(pawHorizL1 / hyp1) - this->phi;
 	double hyp2 = sqrt(pawHorizL2 * pawHorizL2 + this->bodyHeight * this->bodyHeight);
 	double psiDiff2 = acos((this->femur * this->femur + this->tibia * this->tibia - hyp2 * hyp2) / (2 * this->femur * this->tibia)) - psiDiff1 - this->psi;
-	double phiDiff2 = acos((hyp2 * hyp2 + this->femur * this->femur - this->tibia * this->tibia) / (2 * this->femur * hyp2)) - phiDiff1;
+	double phiDiff2 = acos((hyp2 * hyp2 + this->femur * this->femur - this->tibia * this->tibia) / (2 * this->femur * hyp2)) +
+		asin(pawHorizL2 / hyp2) - this->phi - phiDiff1;
 
 	StepAngles* stepAngles = new StepAngles(20);
 	double alphaStep = alphaDiff1 / 10.0;
